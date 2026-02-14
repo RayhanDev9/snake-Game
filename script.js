@@ -71,52 +71,72 @@ const analog = function () {
   ).matches;
 
   if (isTuchScreen) {
-    // Ambil koordinat snake elemen base
-    const rect = base.getBoundingClientRect();
-    let snakeX = rect.left + rect.width / 2;
-    let snakeY = rect.top + rect.height / 2;
+  // --- 1. SETUP TITIK PUSAT ANALOG ---
+const rect = base.getBoundingClientRect();
+// Titik pusat ini harus TETAP (const), tidak boleh berubah saat ular jalan
+const pusatAnalogX = rect.left + rect.width / 2;
+const pusatAnalogY = rect.top + rect.height / 2;
 
-    let sudutUlar = 0;
-    let sedangMenyentuh = false; // Untuk mendeteksi apakah jari masih menempel
+// --- 2. SETUP DATA ULAR (Variabel Global) ---
+let snakeX = window.innerWidth / 2; // Mulai di tengah layar
+let snakeY = window.innerHeight / 2;
+let sudutUlar = 0;
+let sedangMenyentuh = false;
 
-    base.addEventListener('touchmove', e => {
-      const touch = e.touches[0];
+// --- 3. LOGIKA INPUT ANALOG ---
+base.addEventListener('touchmove', e => {
+    e.preventDefault(); // Mencegah layar scroll saat main
+    const touch = e.touches[0];
 
-      // 1. Hitung Delta (Jari vs snake Elemen)
-      const deltaX = touch.clientX - snakeX;
-      const deltaY = touch.clientY - snakeY;
+    // Hitung jarak jari dari PUSAT ANALOG (Bukan dari ular)
+    const deltaX = touch.clientX - pusatAnalogX;
+    const deltaY = touch.clientY - pusatAnalogY;
 
-      // 2. Hitung Sudut (Logic Atan2 yang sakti tadi)
-      const radian = Math.atan2(deltaY, deltaX);
+    // Dapatkan sudut arah tarikan jempol
+    const radian = Math.atan2(deltaY, deltaX);
+    sudutUlar = radian; // Simpan sudut untuk digunakan mesin gerak
+    sedangMenyentuh = true;
 
-      // 3. Gerakkan Visual Stick (Agar stick ikut bergeser saat ditarik)
-      // Kita batasi agar stick tidak keluar dari lingkaran base (max 40px)
-      const jarak = Math.min(Math.hypot(deltaX, deltaY), 40);
-      const stickX = Math.cos(radian) * jarak;
-      const stickY = Math.sin(radian) * jarak;
+    // GERAKKAN VISUAL STICK (Hanya hiasan di dalam lingkaran analog)
+    const jarakMax = 40; 
+    const jarakAktual = Math.min(Math.hypot(deltaX, deltaY), jarakMax);
+    const stickX = Math.cos(radian) * jarakAktual;
+    const stickY = Math.sin(radian) * jarakAktual;
 
-      stick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
-      // Update posisi koordinat (snakeX dan snakeY harus variabel global juga)
-      snakeX += stickX ;
-      snakeY += stickY;
+    stick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
+});
 
-      // Update tampilan visual
-      snakeHead.style.left = `${snakeX}px`;
-      snakeHead.style.top = `${snakeY}px`;
+base.addEventListener('touchend', () => {
+    stick.style.transform = `translate(-50%, -50%)`;
+    // sedangMenyentuh = false; // Buka ini jika ingin ular berhenti saat jari lepas
+});
 
-      // Putar kepala ular (konversi radian ke derajat)
-      const derajat = sudutUlar * (180 / Math.PI);
-      snakeHead.style.transform = `rotate(${derajat}deg)`;
+// --- 4. MESIN GERAK (GAME LOOP) ---
+function update() {
+    if (sedangMenyentuh) {
+        const kecepatan = 5;
 
-      // 4. Kirim Sudut ke Ular
-      sudutUlar = radian;
-      sedangMenyentuh = true;
-    });
+        // Ular bergerak berdasarkan SUDUT yang dihasilkan analog
+        const vx = Math.cos(sudutUlar) * kecepatan;
+        const vy = Math.sin(sudutUlar) * kecepatan;
 
-    // Reset posisi stick saat jempol dilepas
-    base.addEventListener('touchend', () => {
-      stick.style.transform = `translate(-50%, -50%)`;
-    });
+        snakeX += vx;
+        snakeY += vy;
+
+        // Update Posisi Visual Kepala Ular
+        snakeHead.style.left = `${snakeX}px`;
+        snakeHead.style.top = `${snakeY}px`;
+
+        // Putar kepala ular agar menghadap ke arah jalan
+        const derajat = sudutUlar * (180 / Math.PI);
+        snakeHead.style.transform = `rotate(${derajat}deg)`;
+    }
+
+    requestAnimationFrame(update);
+}
+
+// Jalankan mesin game
+update();
   } else {
     const rect = snakeHead.getBoundingClientRect();
     let snakeX = rect.x;
