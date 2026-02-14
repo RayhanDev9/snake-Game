@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <!-- Pop up -->
+      <div class="pop-up hidden">
+        <section class="modal-default">
+          <button class="btn-style play-game">Play Game</button>
+          <button class="btn-style steps-game">Step Game</button>
+        </section>
+        <section class="modal-steps hidden">
+          <button class="close-modal">&times;</button>
+          <h1>Aturan Permainan:</h1>
+          <ol>
+            <li>
+              Mulai: Tekan tombol untuk memulai, sistem akan menyiapkan ular dan
+              makanan di area permainan.
+            </li>
+            <li>
+              Kontrol: Gunakan Keyboard (PC) atau Analog/Mouse (HP) untuk
+              mengarahkan ular.
+            </li>
+
+            <li>
+              Tujuan: Makan objek yang muncul untuk menambah panjang badan ular
+              (+1) dan teruskan permainan.
+            </li>
+            <li>Kalah: Permainan berakhir jika ular menabrak dinding batas.</li>
+          </ol>
+        </section>
+        <div class="overlay"></div>
+      </div>
+
+      <!-- Permainan -->
+      <div class="container">
+        <section class="snake">
+          <div class="snake-head"></div>
+        </section>
+        <section class="food-place"></section>
+        <section id="analog-base">
+          <div id="analog-stick"></div>
+        </section>
+      </div>
+    </main>
+  </body>
+
+  <script src="script.js"></script>
+</html>
